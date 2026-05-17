@@ -1,0 +1,12 @@
+{
+  "name": "event-booking-system",
+  "version": "1.0.0",
+  "description": "Monolithic backend for an Event Booking System",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
