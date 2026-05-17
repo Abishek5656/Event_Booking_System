@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  name         String
+  // Role: 1 -> CUSTOMER, 2 -> ORGANIZER
+  role         Int       @default(1)
+  
+  events       Event[]   @relation("OrganizerEvents")
+  bookings     Booking[]
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@map("users")
+}
+
+
+
+model Event {
+  id             Int       @id @default(autoincrement())
+  title          String
+  description    String
+  venue          String
+  eventDate      DateTime
+  totalSeats     Int
+  availableSeats Int
+  
+  // Optimistic Concurrency Control (Version Locking)
+  version        Int       @default(1)
+  
+  organizerId    Int
+  organizer      User      @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  
+  bookings       Booking[]
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@index([eventDate])
+  @@index([organizerId])
+  @@map("events")
+}
+
+model Booking {
+  id           Int       @id @default(autoincrement())
+  eventId      Int
+  event        Event     @relation(fields: [eventId], references: [id])
+  customerId   Int
+  customer     User      @relation(fields: [customerId], references: [id])
+  ticketsCount Int
+  
+  // Status: 1 -> Cancelled, 2 -> Booked, 3 -> Pending
+  status       Int       @default(3)
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([customerId])
+  @@index([eventId])
+  @@map("bookings")
+}
