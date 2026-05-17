@@ -1,5 +1,7 @@
 # Event Booking System - Backend Architecture
 
+### 🚀 Live API Deployment: [https://event-booking-system-lp3s.onrender.com](https://event-booking-system-lp3s.onrender.com)
+
 ## Overview
 This is a production-ready monolithic Node.js backend for an Event Booking System. It supports two user roles: **Organizers** (who create and manage events) and **Customers** (who browse events and book tickets). 
 
