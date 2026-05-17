@@ -1,14 +1,13 @@
-const { Worker } = require('bullmq');
-const { redisConnection } = require('../../config/queue');
+const { emailQueue } = require('../../config/queue');
 const { prisma } = require('../../config/database');
 const emailService = require('../../services/email.service');
 const logger = require('../../core/logger');
 
-const emailWorker = new Worker(
-  'email-notifications',
-  async (job) => {
-    logger.info(`Processing job ${job.id} of type ${job.name}`);
+// Listen to the in-memory queue events
+emailQueue.on('job', async (job) => {
+  logger.info(`Processing in-memory background job of type ${job.name}`);
 
+  try {
     if (job.name === 'booking-confirmation') {
       const { bookingId } = job.data;
 
@@ -38,8 +37,7 @@ const emailWorker = new Worker(
         include: { customer: true },
       });
 
-      // Send emails to all customers
-      // In production, this should be chunked/batched.
+      // Send emails to all customers asynchronously
       const promises = bookings.map((b) =>
         emailService.sendEventUpdateNotification(b.customer, event)
       );
@@ -47,16 +45,11 @@ const emailWorker = new Worker(
       await Promise.all(promises);
       logger.info(`Sent ${promises.length} update notifications for event ${eventId}`);
     }
-  },
-  { connection: redisConnection }
-);
 
-emailWorker.on('completed', (job) => {
-  logger.info(`Job ${job.id} has completed!`);
+    logger.info(`In-memory job ${job.name} completed successfully!`);
+  } catch (err) {
+    logger.error(`In-memory job ${job.name} failed with: ${err.message}`);
+  }
 });
 
-emailWorker.on('failed', (job, err) => {
-  logger.error(`Job ${job.id} has failed with ${err.message}`);
-});
-
-module.exports = emailWorker;
+module.exports = {};

@@ -16,7 +16,7 @@ graph TD
         Validator --> API
         API --> Service[Service Layer Business Logic]
         Service --> Prisma[Data Access Layer Prisma ORM]
-        Service -.-> Queue[BullMQ Queue]
+        Service -.-> Queue[In-Memory Event Queue]
         Queue --> Worker[Email Worker]
     end
     
@@ -28,7 +28,7 @@ The application follows a strictly layered monolithic structure as per senior en
 - **API Layer (`src/api`)**: Responsible only for HTTP concerns. Contains express `routes`, `controllers`, `middlewares`, and Zod `validators`.
 - **Service Layer (`src/services`)**: Contains all core business logic and transaction management. Services are completely decoupled from HTTP request/response objects, making them highly testable.
 - **Data Access Layer (`prisma/`)**: Uses Prisma ORM for database interactions. Prisma provides type safety, automatic migrations, and built-in connection pooling suitable for PostgreSQL.
-- **Jobs Layer (`src/jobs`)**: BullMQ workers isolate long-running background tasks (like sending emails) from the main API thread.
+- **Jobs Layer (`src/jobs`)**: An event-driven, non-blocking **In-Memory Queue** (using Node.js `EventEmitter` and `setImmediate`) isolates long-running background tasks (like sending emails) from the main API thread without requiring external dependencies like Redis.
 
 ### 2. Database Choice
 **PostgreSQL (via Neon)** was chosen because strict ACID compliance is mandatory for an event booking system to prevent overselling tickets.
@@ -43,7 +43,7 @@ The application follows a strictly layered monolithic structure as per senior en
 
 ### 4. Background Processing & Caching
 Sending emails synchronously during a HTTP request is a severe anti-pattern as it blocks the thread and slows down response times.
-- **Message Queue**: We utilize **Redis** (via `ioredis`) and **BullMQ** to create a robust, persistent message queue.
+- **Message Queue**: We utilize a lightweight, high-performance **In-Memory Queue** driven by Node's native `EventEmitter` and `setImmediate`.
   - **Job 1**: Booking Confirmations are pushed to the queue immediately after a booking is secured in the DB.
   - **Job 2**: Event Updates trigger a job that fetches all related customers and dispatches emails concurrently.
   - Both use **Nodemailer** to send Gmail. If no Gmail credentials are provided in `.env`, the Email Service will automatically mock the email output to the console for easy local testing.
@@ -59,7 +59,6 @@ Sending emails synchronously during a HTTP request is a severe anti-pattern as i
 ### Prerequisites
 1. Node.js (v18+)
 2. PostgreSQL Database (Neon)
-3. Redis Server (Running locally on port 6379)
 
 ### Installation
 ```bash
@@ -74,8 +73,6 @@ Create a `.env` file with the following:
 PORT=3000
 NODE_ENV=development
 DATABASE_URL="postgresql://user:pass@host/db"
-REDIS_HOST=localhost
-REDIS_PORT=6379
 JWT_SECRET=super-secret-key
 GMAIL_USER=your_email@gmail.com
 GMAIL_APP_PASSWORD=your_app_password

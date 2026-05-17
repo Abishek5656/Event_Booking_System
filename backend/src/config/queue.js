@@ -1,27 +1,17 @@
-const { Queue } = require('bullmq');
-const IORedis = require('ioredis');
-const logger = require('../core/logger');
+const EventEmitter = require('events');
 
-const redisConfig = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: process.env.REDIS_PORT || 6379,
-  maxRetriesPerRequest: null,
-};
+class InMemoryQueue extends EventEmitter {
+  async add(name, data) {
+    // Process the job asynchronously on the next tick so it doesn't block the request loop
+    setImmediate(() => {
+      this.emit('job', { name, data });
+    });
+    return { id: Math.random().toString(36).substring(2, 9) };
+  }
+}
 
-const redisConnection = new IORedis(redisConfig);
-
-redisConnection.on('error', (err) => {
-  logger.error('Redis connection error:', err);
-});
-
-redisConnection.on('ready', () => {
-  logger.info('Connected to Redis');
-});
-
-// Create Queues
-const emailQueue = new Queue('email-notifications', { connection: redisConnection });
+const emailQueue = new InMemoryQueue();
 
 module.exports = {
-  redisConnection,
   emailQueue,
 };
