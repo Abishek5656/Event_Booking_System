@@ -1,1 +1,5 @@
-// Workers index
+const emailWorker = require('./email.worker');
+
+module.exports = {
+  emailWorker,
+};
