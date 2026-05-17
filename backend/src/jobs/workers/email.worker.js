@@ -12,12 +12,7 @@ const emailWorker = new Worker(
     if (job.name === 'booking-confirmation') {
       const { bookingId } = job.data;
 
-      const booking = await prisma.booking.findUnique({
-        where: { id: bookingId },
-        include: { user: true, event: true }, // Wait, user is named `customer` in schema.
-      });
 
-      // Let's refetch safely
       const bookingRecord = await prisma.booking.findUnique({
         where: { id: bookingId },
         include: { customer: true, event: true },

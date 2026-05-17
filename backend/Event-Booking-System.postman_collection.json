@@ -72,7 +72,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"password123\"\n}"
+							"raw": "{\n  \"email\": \"abishekvarma8929@gmail.com\",\n  \"password\": \"password123\"\n}"
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/auth/login",
@@ -96,6 +96,29 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"name\": \"Charlie NewUser\",\n  \"email\": \"charlie@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/auth/register",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "3000",
+							"path": ["api", "v1", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Register New Organizer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Organizer User\",\n  \"email\": \"abishekvarma+org@gmail.com\",\n  \"password\": \"password123\",\n  \"role\": \"ORGANIZER\"\n}"
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/auth/register",
