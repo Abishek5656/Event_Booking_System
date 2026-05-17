@@ -20,13 +20,13 @@
     "jsonwebtoken": "^9.0.2",
     "node-cache": "^5.1.2",
     "nodemailer": "^6.9.13",
+    "prisma": "^5.2.0",
     "winston": "^3.11.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
-    "prettier": "^3.0.3",
-    "prisma": "^5.2.0"
+    "prettier": "^3.0.3"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
